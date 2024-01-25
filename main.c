@@ -1,12 +1,20 @@
+#include <stdio.h>
 #include <SDL2/SDL.h>
  
 SDL_Window *window = NULL;
 SDL_Surface *surface = NULL;
 int window_size_w = 800;
 int window_size_h = 600; 
+
+void exit_window() {
+    SDL_FreeSurface(surface);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+}
+
 int main(int args, char *argv[])
 {
-    
+    printf("RRRRRRRRRRRRR\n");
     /*------------初始化視窗------------*/
     SDL_Init(SDL_INIT_VIDEO);
     window = SDL_CreateWindow("Test Windows", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_size_w, window_size_h, SDL_WINDOW_SHOWN);
@@ -38,15 +46,16 @@ int main(int args, char *argv[])
     {
         SDL_FillRect(surface, &rec, SDL_MapRGB(surface->format, 0, 0, 0));
 
-
         if(is_jumping) {
             rec.y -= 6;
             if(rec.y <= ground_y - jump_height) {
                 is_jumping = false;
+                printf("456");
             }
         } else {
             if (rec.y < ground_y) {
                 rec.y += gravity;
+                printf("789");
             } else {
                 rec.y = ground_y; // 限制到地面
             }
@@ -68,23 +77,33 @@ int main(int args, char *argv[])
 
         /*---------------按鍵管理---------------*/
         while (SDL_PollEvent(&event)) {
-            //關閉視窗
-            if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) {
-                goto exit_window;
-            }
-             //跳躍控制
-            if (!is_jumping && rec.y == 570 && event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE) {
-                is_jumping = true;
+
+            if (event.type == SDL_KEYDOWN) {
+                switch (event.key.keysym.sym) {
+
+                    // ESC : 關閉視窗
+                    case SDLK_ESCAPE:
+                        exit_window();
+                        break;
+
+                    // SPACE : 跳躍控制
+                    case SDLK_SPACE:
+                        printf("123\n");
+                        if (!is_jumping && rec.y == ground_y) {
+                            is_jumping = true;
+                            printf("123\n");
+                        }
+                        break;
+                    
+                    default:
+                        break;
+                }
             }
         }
-        
         /*--------------------------------------*/
     }
 
-exit_window:
-    SDL_FreeSurface(surface);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+    exit_window();
  
     return 0;
 }

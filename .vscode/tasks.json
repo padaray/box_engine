@@ -13,15 +13,15 @@
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
                 "-lmingw32",
                 "-lSDL2main",
-                "-lSDL2",
-                "-mwindows"
+                "-lSDL2"
+                // "-mwindows"
             ],
-            "options": {
-                "cwd": "C:\\MinGW\\bin"
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
+            // "options": {
+            //     "cwd": "C:\\MinGW\\bin"
+            // },
+            // "problemMatcher": [
+            //     "$gcc"
+            // ],
             "group": {
                 "kind": "build",
                 "isDefault": true
