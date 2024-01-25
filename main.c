@@ -14,7 +14,6 @@ void exit_window() {
 
 int main(int args, char *argv[])
 {
-    printf("RRRRRRRRRRRRR\n");
     /*------------初始化視窗------------*/
     SDL_Init(SDL_INIT_VIDEO);
     window = SDL_CreateWindow("Test Windows", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_size_w, window_size_h, SDL_WINDOW_SHOWN);
@@ -34,11 +33,15 @@ int main(int args, char *argv[])
     rec.h = 30;
     int ground_y = 570;
     bool direc_flag = true; //true = right
+    int slide_speed = 4;
 
     bool is_jumping = false;
-    int jump_height = 100;
+    int jump_height = 200;
+    int jump_distance = 0;
+    int jump_speed = 4;
 
-    int gravity = 2;
+    float gravity = 0.5;
+    float fall_speed = 0;
     /*---------------------------------*/
     SDL_Event event;
  
@@ -46,34 +49,47 @@ int main(int args, char *argv[])
     {
         SDL_FillRect(surface, &rec, SDL_MapRGB(surface->format, 0, 0, 0));
 
+
+        /*---------------重力加速度---------------*/
         if(is_jumping) {
-            rec.y -= 6;
-            if(rec.y <= ground_y - jump_height) {
+
+            //跳高限制
+            rec.y -= jump_speed;
+            jump_distance += jump_speed;
+            if(jump_distance >= jump_height || rec.y <= 0) {
                 is_jumping = false;
-                printf("456");
+                jump_distance = 0;
+                fall_speed = 0;
             }
+
         } else {
             if (rec.y < ground_y) {
-                rec.y += gravity;
-                printf("789");
+                fall_speed += gravity;
+                rec.y += fall_speed;
             } else {
+                fall_speed = 0;
                 rec.y = ground_y; // 限制到地面
             }
-        }
+        } 
+        /*---------------------------------------*/
 
+
+
+        /*-----------------滑行速度-----------------*/
         if(rec.x > (window_size_w - rec.w) && direc_flag){
             direc_flag = false;
         }else if (rec.x < 0 && !direc_flag){
             direc_flag = true;
         }
 
-        rec.x += (direc_flag ? 8 : -8);
+        rec.x += (direc_flag ? slide_speed : -slide_speed);
+        /*-----------------------------------------*/
         
  
         SDL_FillRect(surface, &rec, SDL_MapRGB(surface->format, 135, 206, 250));
  
         SDL_UpdateWindowSurface(window);
-        SDL_Delay((1.0 / 60) * 1000);
+        SDL_Delay((1.0 / 240) * 1000);
 
         /*---------------按鍵管理---------------*/
         while (SDL_PollEvent(&event)) {
@@ -88,11 +104,10 @@ int main(int args, char *argv[])
 
                     // SPACE : 跳躍控制
                     case SDLK_SPACE:
-                        printf("123\n");
-                        if (!is_jumping && rec.y == ground_y) {
-                            is_jumping = true;
-                            printf("123\n");
-                        }
+                        // if (!is_jumping && rec.y == ground_y) {
+                        //     is_jumping = true;
+                        // }
+                        is_jumping = true;
                         break;
                     
                     default:
