@@ -15,7 +15,7 @@ void exit_window() {
 int main(int args, char *argv[])
 {
     /*------------初始化視窗------------*/
-    SDL_Init(SDL_INIT_VIDEO);
+    SDL_Init(SDL_INIT_EVERYTHING);
     window = SDL_CreateWindow("Test Windows", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_size_w, window_size_h, SDL_WINDOW_SHOWN);
     if (!window)
         return -1;
@@ -38,7 +38,9 @@ int main(int args, char *argv[])
     bool is_jumping = false;
     int jump_height = 200;
     int jump_distance = 0;
-    int jump_speed = 4;
+    float jump_speed = 20;
+    float recent_js = 0;
+    bool print_space = false;
 
     float gravity = 0.5;
     float fall_speed = 0;
@@ -51,26 +53,26 @@ int main(int args, char *argv[])
 
 
         /*---------------重力加速度---------------*/
-        if(is_jumping) {
-
-            //跳高限制
-            rec.y -= jump_speed;
-            jump_distance += jump_speed;
-            if(jump_distance >= jump_height || rec.y <= 0) {
+        if(is_jumping && print_space) {
+            recent_js = jump_speed;
+            rec.y -= recent_js;
+            recent_js -= gravity;
+            print_space = false;
+            if(rec.y <= 0) {
+                recent_js = 0;
+            }
+        } else if (is_jumping && rec.y >= 0) {
+            rec.y -= recent_js;
+            recent_js -= gravity;
+            if (rec.y >= ground_y) {
+                recent_js = 0;
                 is_jumping = false;
-                jump_distance = 0;
-                fall_speed = 0;
+                rec.y = ground_y;
             }
-
-        } else {
-            if (rec.y < ground_y) {
-                fall_speed += gravity;
-                rec.y += fall_speed;
-            } else {
-                fall_speed = 0;
-                rec.y = ground_y; // 限制到地面
-            }
-        } 
+        } else if (is_jumping && rec.y < 0) {
+            rec.y = 0;
+            continue;
+        }
         /*---------------------------------------*/
 
 
@@ -104,10 +106,8 @@ int main(int args, char *argv[])
 
                     // SPACE : 跳躍控制
                     case SDLK_SPACE:
-                        // if (!is_jumping && rec.y == ground_y) {
-                        //     is_jumping = true;
-                        // }
                         is_jumping = true;
+                        print_space = true;
                         break;
                     
                     default:
